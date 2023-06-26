@@ -42,6 +42,7 @@ setup(
         "cached_property",
         "numpy",
         "lhotse",
+        "safe-gpu"
     ],
     extras_require={
         "dev": dev_requires,

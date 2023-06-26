@@ -3,6 +3,8 @@ import logging
 import time
 from pathlib import Path
 
+
+from safe_gpu import safe_gpu
 import click
 from lhotse import Recording, SupervisionSet, load_manifest_lazy
 from lhotse.audio import set_audio_duration_mismatch_tolerance
@@ -195,6 +197,8 @@ def cuts_(
 
         atexit.register(exit)
 
+    safe_gpu.claim_gpus()
+
     if duration_tolerance is not None:
         set_audio_duration_mismatch_tolerance(duration_tolerance)
 
@@ -209,6 +213,12 @@ def cuts_(
         cuts_per_segment = CutSet.from_cuts(
             fastcopy(cut, channel=channels) for cut in cuts_per_segment
         )
+    
+    cuts = cuts.subset(first=1)
+    cuts_per_segment = cuts_per_segment.subset(first=10)
+
+    cuts_per_segment.describe()
+    cuts.describe()
 
     # Paranoia mode: ensure that cuts_per_recording have ids same as the recording_id
     cuts = CutSet.from_cuts(cut.with_id(cut.recording_id) for cut in cuts)
